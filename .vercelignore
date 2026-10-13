@@ -1,0 +1,7 @@
+node_modules
+.venv
+backend/.venv
+frontend/node_modules
+backend/storage
+.env
+*.log

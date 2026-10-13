@@ -81,14 +81,14 @@ function CvCard() {
     setClientError(null);
     if (!f) return;
     if (f.type !== "application/pdf" && !f.name.toLowerCase().endsWith(".pdf")) return setClientError("Please choose a PDF file.");
-    if (f.size > 5 * 1024 * 1024) return setClientError("The file is larger than 5 MB.");
+    if (f.size > 4 * 1024 * 1024) return setClientError("The file is larger than 4 MB.");
     upload.mutate(f, { onSuccess: () => toast.success("CV uploaded"), onError: toast.error });
   };
   const name = profile.data?.cv_filename;
   return (
     <section className="card p-6" aria-labelledby="cv-h">
       <h2 id="cv-h" className="text-lg">Your CV</h2>
-      <p className="mt-1 text-sm text-slate-500">PDF only, up to 5 MB. Employers see it only when you apply to their jobs.</p>
+      <p className="mt-1 text-sm text-slate-500">PDF only, up to 4 MB. Employers see it only when you apply to their jobs.</p>
       <div className="mt-4 flex flex-wrap items-center gap-3">
         {name ? (
           <>

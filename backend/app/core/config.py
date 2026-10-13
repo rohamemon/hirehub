@@ -30,6 +30,7 @@ class Settings(BaseSettings):
     cookie_samesite: str = "lax"  # use "none" only if frontend/API are on different sites
 
     rate_limit_enabled: bool = True
+    serverless: bool = False  # true on Vercel: no connection pooling in-process, transaction-pooler friendly
 
     storage_backend: str = "local"  # local | s3 (any S3-compatible private bucket: Supabase, R2, AWS)
     upload_dir: Path = Path("./storage")  # used by the local backend; private, never served statically
@@ -38,7 +39,7 @@ class Settings(BaseSettings):
     s3_region: str = "us-east-1"
     s3_access_key: str = ""
     s3_secret_key: str = ""
-    max_cv_bytes: int = 5 * 1024 * 1024
+    max_cv_bytes: int = 4 * 1024 * 1024  # 4 MB keeps uploads under Vercel's 4.5 MB request-body limit
     max_image_bytes: int = 2 * 1024 * 1024
 
     email_backend: str = "console"  # console | smtp
