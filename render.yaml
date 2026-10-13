@@ -1,0 +1,37 @@
+# Render Blueprint: backend (Docker web service) + frontend (static site that proxies /api to the backend).
+# Database and file storage live in Supabase (see DEPLOY.md). Secrets marked sync:false are entered in the Render dashboard.
+services:
+  - type: web
+    name: hirehub-api
+    runtime: docker
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - { key: ENVIRONMENT, value: production }
+      - { key: COOKIE_SECURE, value: "true" }
+      - { key: DOCS_ENABLED, value: "false" }
+      - { key: SECRET_KEY, generateValue: true }
+      - { key: DATABASE_URL, sync: false }          # Supabase connection string (postgresql+psycopg://...)
+      - { key: FRONTEND_URL, sync: false }          # https://<your-site>.onrender.com
+      - { key: CORS_ORIGINS, sync: false }          # same value as FRONTEND_URL
+      - { key: STORAGE_BACKEND, value: s3 }
+      - { key: S3_BUCKET, value: hirehub-files }
+      - { key: S3_ENDPOINT_URL, sync: false }       # Supabase Storage S3 endpoint
+      - { key: S3_REGION, sync: false }
+      - { key: S3_ACCESS_KEY, sync: false }
+      - { key: S3_SECRET_KEY, sync: false }
+      - { key: EMAIL_BACKEND, value: console }      # switch to smtp + SMTP_* when you have a mail provider
+
+  - type: web
+    name: hirehub-web
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    routes:
+      # Proxy API calls through the site's own domain so the refresh cookie is first-party.
+      - { type: rewrite, source: /api/*, destination: https://hirehub-api.onrender.com/api/:splat }
+      - { type: rewrite, source: /sitemap.xml, destination: https://hirehub-api.onrender.com/sitemap.xml }
+      - { type: rewrite, source: /*, destination: /index.html }

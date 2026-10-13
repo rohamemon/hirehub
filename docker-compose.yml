@@ -1,0 +1,45 @@
+# Local full stack:  docker compose up --build   ->  http://localhost:8080
+# Database only (for running backend/frontend on your machine):  docker compose up -d db
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: hirehub
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hirehub_dev_password}
+      POSTGRES_DB: hirehub
+    ports: ["5433:5432"]   # 5433 on the host so it doesn't clash with a local Postgres
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hirehub -d hirehub"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build: ./backend
+    depends_on:
+      db: { condition: service_healthy }
+    environment:
+      DATABASE_URL: postgresql+psycopg://hirehub:${POSTGRES_PASSWORD:-hirehub_dev_password}@db:5432/hirehub
+      SECRET_KEY: ${SECRET_KEY:-dev-only-secret-key-change-me-0123456789abcdef}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:8080}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080,http://localhost:5173}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      EMAIL_BACKEND: ${EMAIL_BACKEND:-console}
+      EMAIL_FROM: ${EMAIL_FROM:-HireHub <no-reply@hirehub.local>}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+    volumes: [uploads:/data/uploads]
+    ports: ["${API_PORT:-8000}:8000"]
+
+  frontend:
+    build: ./frontend
+    depends_on: [backend]
+    ports: ["${WEB_PORT:-8080}:80"]
+
+volumes:
+  pgdata:
+  uploads:
