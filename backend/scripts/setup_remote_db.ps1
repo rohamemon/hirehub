@@ -2,10 +2,16 @@
 # Run from the hirehub\backend folder:   .\scripts\setup_remote_db.ps1
 # Values are typed into this window only; nothing is written to disk or sent anywhere except your database.
 
-$url = Read-Host "Supabase SESSION pooler URL (port 5432, starts with postgresql+psycopg://)" -MaskInput
+function Read-Secret($prompt) {   # works in Windows PowerShell 5.1 and 7; input is hidden
+    $sec = Read-Host $prompt -AsSecureString
+    $ptr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($sec)
+    try { return [Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr) } finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr) }
+}
+
+$url = Read-Secret "Supabase SESSION pooler URL (port 5432, starts with postgresql+psycopg://)"
 if ($url -notmatch '^postgresql\+psycopg://') { Write-Error "URL must start with postgresql+psycopg://"; exit 1 }
 $email = Read-Host "Admin email"
-$pw = Read-Host "Admin password (letters + numbers, 8+ chars)" -MaskInput
+$pw = Read-Secret "Admin password (letters + numbers, 8+ chars)"
 
 $env:DATABASE_URL = $url
 $env:ADMIN_PASSWORD = $pw
