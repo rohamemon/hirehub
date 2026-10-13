@@ -7,3 +7,7 @@ __pycache__/
 .pytest_cache/
 backend/storage/
 *.log
+
+*.secrets.env
+deploy.secrets.env
+.vercel/
