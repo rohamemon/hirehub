@@ -1,6 +1,7 @@
 """Seed data.
 
     python -m scripts.seed --categories-only   # safe for production: just the category list
+    python -m scripts.seed --showcase          # safe for production: fictional companies + open jobs only
     python -m scripts.seed                      # full DEVELOPMENT demo data (refuses in production)
 
 Re-running is safe: it skips anything that already exists. To start over completely
@@ -186,10 +187,54 @@ def seed_demo(db) -> None:
     print(f"Demo logins (development only): student1@example.com / employer1@example.com, password {DEMO_PASSWORD}")
 
 
+def seed_showcase(db) -> None:
+    """Fictional companies and jobs so a fresh public site isn't empty.
+
+    Unlike the full demo seed this creates NO logins anyone could use: the owning employer
+    accounts get random passwords that are never shown, and there are no students or applications.
+    """
+    import secrets
+
+    cats = seed_categories(db)
+    if db.scalar(select(Company.id).where(Company.slug == slugify(COMPANIES[0][0]))):
+        print("Showcase data already present - nothing to do.")
+        return
+    rnd = random.Random(7)
+    companies = []
+    for i, (name, desc, industry, loc) in enumerate(COMPANIES, 1):
+        c = Company(name=name, slug=slugify(name), description=desc, industry=industry, location=loc,
+                    website=f"https://{slugify(name)}.example.com", size="11-50")
+        db.add(c)
+        db.flush()
+        u = User(email=f"showcase{i}@example.com", password_hash=hash_password(secrets.token_urlsafe(32)),
+                 full_name=f"{name} Recruiting", role="employer", is_active=True, email_verified=True)
+        db.add(u)
+        db.flush()
+        db.add(EmployerProfile(user_id=u.id, company_id=c.id, job_title="Talent Lead"))
+        companies.append((c, u))
+    for n, (title, ci, cat, etype, level, wp, loc, smin, smax, skills) in enumerate(JOBS):
+        company, recruiter = companies[ci]
+        db.add(Job(company_id=company.id, posted_by_id=recruiter.id, category_id=cats[cat].id, title=title,
+                   description=f"{company.name} is looking for a {title} to join our team. You will work with a friendly, "
+                               f"collaborative group on meaningful projects and grow quickly.",
+                   responsibilities="- Deliver high quality work\n- Collaborate with the team\n- Share knowledge",
+                   requirements="- Strong communication skills\n- Eagerness to learn\n- Relevant coursework or projects",
+                   skills=skills, employment_type=etype, experience_level=level, workplace_type=wp, location=loc,
+                   salary_min=smin, salary_max=smax, salary_currency="EUR",
+                   deadline=date.today() + timedelta(days=rnd.randint(60, 120)),
+                   status="published", published_at=utcnow() - timedelta(days=n + 1)))
+    db.commit()
+    print(f"Showcase ready: {len(companies)} fictional companies, {len(JOBS)} jobs (no usable logins created).")
+
+
 def main() -> None:
     categories_only = "--categories-only" in sys.argv
+    if "--showcase" in sys.argv:
+        with SessionLocal() as db:
+            seed_showcase(db)
+        return
     if not categories_only and get_settings().is_production:
-        sys.exit("Refusing to load demo data in production. Use --categories-only.")
+        sys.exit("Refusing to load demo data in production. Use --categories-only or --showcase.")
     with SessionLocal() as db:
         if categories_only:
             seed_categories(db)
