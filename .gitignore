@@ -11,3 +11,6 @@ backend/storage/
 *.secrets.env
 deploy.secrets.env
 .vercel/
+
+.vercel
+.env*
