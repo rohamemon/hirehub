@@ -200,7 +200,7 @@ Last run on the author's Windows machine:
 
 ## Screenshots
 
-Captured from the live site (public pages; the logged-in dashboards are not shown yet).
+Public pages below were captured from the live site. Dashboard screenshots further down were captured from a local run with the seeded demo data (fictional people).
 
 | Home | Jobs |
 |---|---|
@@ -211,6 +211,16 @@ Captured from the live site (public pages; the logged-in dashboards are not show
 | Sign up | Mobile (390 px) |
 |---|---|
 | ![Registration](docs/screenshots/register.png) | ![Home on mobile](docs/screenshots/home-mobile.png) |
+
+### Dashboards (local demo data)
+
+| Student overview | Student profile & CV |
+|---|---|
+| ![Student dashboard](docs/screenshots/dashboard-student.png) | ![Student profile](docs/screenshots/student-profile.png) |
+| **Employer analytics** | **Employer applicants** |
+| ![Employer analytics](docs/screenshots/dashboard-employer.png) | ![Employer applicants](docs/screenshots/employer-applicants.png) |
+| **Admin overview** | **Admin users** |
+| ![Admin overview](docs/screenshots/dashboard-admin.png) | ![Admin users](docs/screenshots/admin-users.png) |
 
 
 ## Known limitations
