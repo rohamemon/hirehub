@@ -57,7 +57,7 @@ Open `https://<project>.vercel.app/health` → `{"status":"ok"}`. Register a stu
 - **Uploads are limited to 4 MB** (Vercel request bodies are capped around 4.5 MB). The app enforces 4 MB.
 - **Rate limiting is per function instance** (in memory), so it only slows abuse, it doesn't strictly cap it.
 - First request after idle can be slow (cold start).
-- Emails are only logged until you add an SMTP provider (`EMAIL_BACKEND=smtp`, `SMTP_*`).
+- Emails are only logged until you add an SMTP provider. Run `set_smtp_vercel.ps1` (see "Real emails" below).
 - Supabase free projects pause after a week of inactivity; open the dashboard to resume.
 
 ## Troubleshooting
@@ -65,3 +65,12 @@ Open `https://<project>.vercel.app/health` → `{"status":"ok"}`. Register a stu
 - **`relation does not exist`:** step 2 (migrations) wasn't run against this database.
 - **Login works, then 401 loop:** `FRONTEND_URL`/`CORS_ORIGINS` don't exactly match the site address (https, no trailing slash).
 - **Build too large:** the Python bundle must stay under 250 MB; tell me and I'll slim it down.
+
+## Real emails (Brevo free tier, 300 emails/day)
+1. Create a free account at brevo.com and verify your email.
+2. **Senders** → add and verify the address you want emails to come from (a Gmail address works; Brevo sends it a confirmation link).
+3. **SMTP & API → SMTP** → generate an SMTP key. Note the **login** and the **key** (shown once).
+4. Run, from the `hirehub` folder: `powershell -ExecutionPolicy Bypass -File .\set_smtp_vercel.ps1`
+   It asks for host (`smtp-relay.brevo.com`), port (`587`), login, key and the verified from-address, then redeploys.
+5. Test: register on the live site with a real email address; the verification email should arrive (check spam).
+Free providers may mark mail from unverified domains as spam; a custom domain with SPF/DKIM improves delivery.
