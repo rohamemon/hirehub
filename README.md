@@ -3,8 +3,9 @@
 A full-stack job and internship platform connecting **students**, **employers** and **administrators**.
 Built as a portfolio project with React + TypeScript on the front end and FastAPI + PostgreSQL on the back end.
 
-> **Status:** runs locally (verified, see [Verification](#verification)). It has **not** been deployed anywhere;
-> [Deployment](#deployment) explains how, and what accounts/keys you need.
+> **Live demo:** <https://hirehub-roha.vercel.app> (Vercel + Supabase free tiers; first request after idle can be slow).
+> The production site starts with job categories only, so the job list is empty until employers post jobs.
+> See [Verification](#verification) for exactly what was tested, and [`DEPLOY.md`](DEPLOY.md) to deploy your own copy.
 
 ## Features
 
@@ -156,7 +157,9 @@ The front end is a client-rendered SPA. Each page sets its title, description, c
 
 ## Deployment
 
-Nothing is deployed yet. A low-cost, sensible path (accounts/keys are yours to create):
+The live site runs on **Vercel** (React build + FastAPI as a serverless function) with **Supabase** (PostgreSQL + private
+S3-compatible bucket). The step-by-step guide for that setup is [`DEPLOY.md`](DEPLOY.md). Other options for a container-based setup
+(accounts/keys are yours to create):
 
 | Piece | Option | What you need |
 |---|---|---|
@@ -191,7 +194,9 @@ Last run on the author's Windows machine:
 - Backend: `pytest` → 60 passed (auth, authorization/ownership, jobs, search/filters, applications, uploads, admin, DB constraints).
 - Frontend: `vitest` → 25 passed; `npm run build` (typecheck + production build) succeeds.
 - Docker Compose: images build; db, backend (`/health`) and nginx start healthy; the nginx → API proxy, SPA fallback, sitemap, login and admin stats were exercised with `curl`.
-- **Not verified:** visual/responsive/accessibility review in a real browser, real SMTP delivery, any cloud deployment.
+- Production (Vercel + Supabase): home and SPA routes, `/health`, categories, register, login, refresh-cookie flow, and CV upload/download through the private Supabase bucket were exercised with `curl`.
+- Visual check: screenshots of the home, jobs and login pages at desktop width and at a true 390 px mobile width looked correct (no horizontal overflow). Dashboards, admin screens and keyboard/screen-reader accessibility were **not** visually checked.
+- **Not verified:** real SMTP delivery; backend tests were not re-run after the serverless changes (Docker was unavailable at the time).
 
 ## Screenshots
 
@@ -200,7 +205,7 @@ _Add screenshots here after running the app (home, jobs, job details, dashboards
 ## Known limitations
 
 - Rate limiting is in-memory (per process); use Redis for multiple instances.
-- Uploads use local disk behind a storage abstraction; no S3/signed-URL backend yet.
+- Uploads support local disk or an S3-compatible bucket (streamed through the API after authorization; no signed URLs). On Vercel, CVs are limited to 4 MB.
 - Search uses `ILIKE` with B-tree indexes on filter columns. For large datasets add `pg_trgm`/full-text indexes.
 - SPA rendering limits social-preview/SEO as described above.
 - Emails are logged in development; real delivery requires SMTP configuration and was not tested against a live provider.
