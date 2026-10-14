@@ -200,7 +200,18 @@ Last run on the author's Windows machine:
 
 ## Screenshots
 
-_Add screenshots here after running the app (home, jobs, job details, dashboards)._ 
+Captured from the live site (public pages; the logged-in dashboards are not shown yet).
+
+| Home | Jobs |
+|---|---|
+| ![Home page](docs/screenshots/home.png) | ![Jobs search and filters](docs/screenshots/jobs.png) |
+| **Job details** | **Company profile** |
+| ![Job details](docs/screenshots/job-details.png) | ![Company page](docs/screenshots/company.png) |
+
+| Sign up | Mobile (390 px) |
+|---|---|
+| ![Registration](docs/screenshots/register.png) | ![Home on mobile](docs/screenshots/home-mobile.png) |
+
 
 ## Known limitations
 
